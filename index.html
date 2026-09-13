@@ -707,7 +707,7 @@
     </div>
 
     <script>
-        // --- INITIAL STATE ---
+        // --- INITIAL STATE DEFAULT ---
         const DEFAULT_STATE = {
             staffName: "Frans Ganteng",
             totalTarget: 30000000,
@@ -720,7 +720,6 @@
         };
 
         let appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
-
         let isEditModeSoldItems = false;
         
         // Lock Settings state with timestamp relock (5 minutes)
@@ -728,7 +727,7 @@
         const SETTINGS_PIN = "0987";
         const RELOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 Menit (300,000 ms)
 
-        // Cute Animated Cat GIFs directly sourced from Tenor (https://tenor.com/en-GB/search/kucing-lucu-gifs)
+        // Tenor Cute Cat GIFs
         const catGifUrls = [
             "https://media.tenor.com/images/ea3c0718fad81076af184599bb55332a/tenor.gif",
             "https://media.tenor.com/images/eff22afc2220e9df92a7aa2f53948f9f/tenor.gif",
@@ -742,7 +741,7 @@
             "https://media.tenor.com/LPLwwL9Rx6oAAAAC/paws-playing.gif"
         ];
 
-        // List Sapaan Jawa Lucu
+        // Sapaan Bahasa Jawa
         const javaneseGreetings = [
             "Sugeng Makaryo, Ojo Ngelamun Wae! 🤪",
             "Semangat Cari Cuan, Kanggo Tuku Seblak! 🍜",
@@ -764,6 +763,30 @@
         ];
 
         let chartInstance = null;
+
+        // --- MANAJEMEN PERSISTENSI LOCAL STORAGE ---
+        function saveState() {
+            try {
+                localStorage.setItem('DODOLANKU_APP_DATA', JSON.stringify(appState));
+            } catch (e) {
+                console.error("Gagal menyimpan data ke LocalStorage", e);
+            }
+        }
+
+        function loadState() {
+            try {
+                const savedData = localStorage.getItem('DODOLANKU_APP_DATA');
+                if (savedData) {
+                    appState = JSON.parse(savedData);
+                } else {
+                    generateDummyTransactions();
+                    saveState();
+                }
+            } catch (e) {
+                console.error("Gagal membaca data dari LocalStorage", e);
+                appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            }
+        }
 
         function formatIDR(val) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
@@ -839,7 +862,7 @@
             }, 300);
         }
 
-        // --- TAB NAVIGATION WITH PIN PROTECTION & 5 MINUTE RELOCK ---
+        // --- NAVIGATION & LOCKING ---
         function initTabBar() {
             const tabItems = document.querySelectorAll('.tab-item');
 
@@ -949,6 +972,7 @@
         window.deleteSalesTransaction = function(txId) {
             if (confirm("Apakah Anda yakin ingin menghapus catatan penjualan ini?")) {
                 appState.salesTransactions = appState.salesTransactions.filter(t => t.id !== txId);
+                saveState();
                 updateUI();
             }
         };
@@ -983,6 +1007,7 @@
         window.deleteMasterProduct = function(prodId) {
             if (confirm("Apakah Anda yakin ingin menghapus produk ini dari daftar master?")) {
                 appState.masterProducts = appState.masterProducts.filter(p => p.id !== prodId);
+                saveState();
                 renderMasterProducts();
             }
         };
@@ -1173,7 +1198,9 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             initTabBar();
-            generateDummyTransactions();
+            
+            // Load persistent state
+            loadState();
 
             const todayStr = formatDateKey(new Date());
             document.getElementById('calendarPicker').value = todayStr;
@@ -1230,6 +1257,8 @@
                     totalAmount: totalAmount
                 });
 
+                saveState(); // Simpan Otomatis
+
                 document.getElementById('salesInputName').value = '';
                 document.getElementById('salesInputUnitPrice').value = '';
                 document.getElementById('salesInputQty').value = '1';
@@ -1262,6 +1291,7 @@
                 if (newName) appState.staffName = newName;
                 if (!isNaN(newTarget) && newTarget > 0) appState.totalTarget = newTarget;
 
+                saveState(); // Simpan Otomatis
                 alert('Profil & Target berhasil diperbarui!');
                 updatePeriodicHeaderContent();
                 updateUI();
@@ -1273,17 +1303,21 @@
 
                 if (name && !isNaN(price) && price > 0) {
                     appState.masterProducts.push({ id: 'p_' + Date.now(), name: name, price: price });
+                    saveState(); // Simpan Otomatis
                     document.getElementById('newProdName').value = '';
                     document.getElementById('newProdPrice').value = '';
                     renderMasterProducts();
                 } else {
-                    alert('Mohon masukkan nama produk dan harga melek.');
+                    alert('Mohon masukkan nama produk dan harga yang valid.');
                 }
             });
 
             document.getElementById('resetDataBtn').addEventListener('click', () => {
                 if (confirm("PERINGATAN: Seluruh data penjualan dan target akan di-reset ke setelan awal. Lanjutkan?")) {
+                    localStorage.removeItem('DODOLANKU_APP_DATA');
                     appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+                    generateDummyTransactions();
+                    saveState();
                     document.getElementById('salesInputDate').value = todayStr;
                     updatePeriodicHeaderContent();
                     updateUI();
