@@ -133,6 +133,7 @@
             border-radius: 50%;
             object-fit: cover;
             background: #111;
+            transition: opacity 0.3s ease;
         }
 
         .user-row .welcome { 
@@ -434,13 +435,13 @@
 
         <!-- ================= TAB 1: HOME ================= -->
         <div class="tab-content active" id="tab-home">
-            <!-- Header Staff & Sapaan Jawa Lucu + Animated Cat Avatar -->
+            <!-- Header Staff & Sapaan Jawa Lucu + Animated Cat Avatar (From Tenor) -->
             <div class="glass-card">
                 <div class="user-row">
                     <div style="display:flex; align-items:center; gap:12px;">
-                        <!-- Cute Animated Cat Avatar Badge (Changes every 1 min) -->
+                        <!-- Cute Animated Cat Avatar Frame (Tenor Source - Changes every 1 min) -->
                         <div class="cat-avatar-frame">
-                            <img id="catAvatarImg" class="cat-avatar-img" src="" alt="Cat GIF">
+                            <img id="catAvatarImg" class="cat-avatar-img" src="" alt="Kucing Lucu GIF (Tenor)">
                         </div>
 
                         <div>
@@ -720,14 +721,18 @@
         const SETTINGS_PIN = "0987";
         const RELOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 Menit (300,000 ms)
 
-        // Cute Animated Cat GIFs for Avatar Frame (Rotates every 1 minute)
+        // Cute Animated Cat GIFs directly sourced from Tenor (https://tenor.com/en-GB/search/kucing-lucu-gifs)
         const catGifUrls = [
-            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWk1ZHRud2gxaHR4OWtueW93a2U1bWJtMnB0bzdrZzV2OGExaHBidCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BzyTuYCmvSORqs1ABM/giphy.gif",
-            "https://media.giphy.com/media/jpbnoe3UIa8TU8LM13/giphy.gif",
-            "https://media.giphy.com/media/mlvseq9yvZhba/giphy.gif",
-            "https://media.giphy.com/media/lhLIUcjcb6unS/giphy.gif",
-            "https://media.giphy.com/media/13CoXDiaCcCoyk/giphy.gif",
-            "https://media.giphy.com/media/CjmvTCZf2U3p09Cn0h/giphy.gif"
+            "https://media.tenor.com/images/ea3c0718fad81076af184599bb55332a/tenor.gif",
+            "https://media.tenor.com/images/eff22afc2220e9df92a7aa2f53948f9f/tenor.gif",
+            "https://media.tenor.com/images/e0f28542d811073f2b3d223e8ed119f3/tenor.gif",
+            "https://media.tenor.com/images/75b3c8eca95d917c650cd574b91db7f7/tenor.gif",
+            "https://media.tenor.com/images/80aa0a25bee9defa1d1d7ecaab75f3f4/tenor.gif",
+            "https://media.tenor.com/LSI81MmB6gEAAAAC/cat-fear.gif",
+            "https://media.tenor.com/M8lH_e6QeyMAAAAC/cat.gif",
+            "https://media.tenor.com/cgHxc_n20ccAAAAC/cat-angry-cat.gif",
+            "https://media.tenor.com/jzQJN2e0QvIAAAAC/cat.gif",
+            "https://media.tenor.com/LPLwwL9Rx6oAAAAC/paws-playing.gif"
         ];
 
         // List Sapaan Jawa Lucu
@@ -802,7 +807,7 @@
             appState.salesTransactions = dummy;
         }
 
-        // --- TIMER SAPAAN, MOTIVASI & CAT GIF (60 DETIK) ---
+        // --- TIMER SAPAAN, MOTIVASI & TENOR CAT GIF (60 DETIK) ---
         function updatePeriodicHeaderContent() {
             const randomGreeting = javaneseGreetings[Math.floor(Math.random() * javaneseGreetings.length)];
             const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
