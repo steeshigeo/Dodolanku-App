@@ -1,41 +1,1296 @@
-<!-- TAB PROGRESS (3 Columns Grid Breakdown) -->
-<div class="grid-3">
-    <div class="glass-card grid-card">
-        <div class="label">🎯 Target Harian</div>
-        <div class="val" id="dailyTargetText">Rp0</div>
-        <div class="sub">Minimum / hari</div>
-    </div>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DODOLANKU - Staff Tracker</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #090a15;
+            --glass-bg: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.65);
+            --color-red: #ef4444;
+            --color-yellow: #eab308;
+            --color-green: #22c55e;
+            --color-cyan: #06b6d4;
+            --color-purple: #a855f7;
+        }
 
-    <!-- Item Terbanyak / Sering Dijual -->
-    <div class="glass-card grid-card">
-        <div class="label">🔥 Top Produk</div>
-        <div class="val" id="topSellingProductText" title="-">-</div>
-        <div class="sub" id="topSellingProductSub">0 Item Terjual</div>
-    </div>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    <div class="glass-card grid-card">
-        <div class="label">📈 Rata Sales</div>
-        <div class="val" id="dailyAverageText">Rp0</div>
-        <div class="sub" id="performanceCategoryText">Status Performa</div>
-    </div>
-</div>
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 16px 12px 95px 12px;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-<!-- MODAL PIN LOCK WITH NUMERIC KEYBOARD -->
-<div class="modal" id="pinModal">
-    <div class="glass-card modal-content" style="max-width:340px; text-align:center;">
-        <div style="font-size:2.5rem; margin-bottom:4px;">🔒</div>
-        <h3 style="font-size:1.1rem; margin-bottom:4px;">Lebokno sandine sek.</h3>
-        <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">Masukkan 4-digit sandi untuk masuk ke Settings.</p>
+        /* Ambient Glass Orbs Background */
+        .ambient-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(90px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 { width: 320px; height: 320px; background: rgba(37, 99, 235, 0.35); top: -50px; left: -80px; }
+        .orb-2 { width: 350px; height: 350px; background: rgba(168, 85, 247, 0.28); bottom: 50px; right: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: rgba(6, 182, 212, 0.25); top: 40%; left: 50%; transform: translate(-50%, -50%); }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 18px;
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Tab Content Visibility */
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Top Navbar Header */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 6px;
+        }
+
+        .navbar h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* User & Status Header */
+        .user-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         
-        <div class="form-group">
-            <input type="password" id="pinInputCode" class="form-input pin-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        .cat-avatar-frame {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--color-cyan), var(--color-purple));
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+        .cat-avatar-frame:hover {
+            transform: scale(1.08) rotate(4deg);
+        }
+
+        .cat-avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #111;
+            transition: opacity 0.3s ease;
+        }
+
+        .user-row .welcome { 
+            font-size: 0.85rem; 
+            color: var(--color-cyan); 
+            font-weight: 600;
+            transition: opacity 0.3s ease;
+        }
+        .user-row .staff-name {
+            font-size: 1.45rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 50px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--glass-border);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+
+        .motivation-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 12px;
+            border-left: 3px solid var(--color-cyan);
+            font-size: 0.82rem;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 12px;
+            min-height: 46px;
+        }
+
+        /* Live Today Target Card */
+        .live-today-card {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(59, 130, 246, 0.1));
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .pulse-red {
+            width: 6px; height: 6px; border-radius: 50%; background: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+            animation: pulse 1.2s infinite;
+        }
+
+        /* Buttons */
+        .btn-action-main {
+            background: linear-gradient(135deg, var(--color-cyan), #3b82f6);
+            color: white;
+            border: none;
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 18px rgba(6, 182, 212, 0.35);
+            transition: transform 0.2s;
+        }
+        .btn-action-main:active { transform: scale(0.96); }
+
+        .btn-toggle-edit {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: 0.2s;
+        }
+        .btn-toggle-edit.active {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-danger:active { transform: scale(0.96); }
+
+        .btn-icon-delete {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: none; /* Default Hidden */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .btn-icon-delete.show { display: flex; }
+
+        /* Progress Line */
+        .progress-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
+        .amount-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
+        .current-amount { font-size: 1.5rem; font-weight: 800; }
+        .target-amount { font-size: 0.75rem; color: var(--text-muted); }
+
+        .progress-track {
+            width: 100%; height: 14px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 50px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 50px; width: 0%;
+            transition: width 0.8s ease, background-color 0.5s;
+        }
+        .progress-subtext {
+            display: flex; justify-content: space-between;
+            margin-top: 8px; font-size: 0.75rem; font-weight: 700;
+        }
+
+        /* Grid Cards */
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .grid-card { display: flex; flex-direction: column; gap: 6px; padding: 14px 10px; }
+        .grid-card .label { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+        .grid-card .val { font-size: 0.92rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .grid-card .sub { font-size: 0.65rem; color: var(--text-muted); }
+
+        .chart-container { position: relative; height: 180px; width: 100%; margin-top: 10px; }
+
+        .calendar-picker {
+            width: 100%; background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border); color: white;
+            padding: 10px 14px; border-radius: 12px; font-size: 0.9rem;
+            outline: none; color-scheme: dark;
+        }
+        .history-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 14px; padding: 14px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.08); margin-top: 10px;
+        }
+
+        /* Sold Items List */
+        .sold-item-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px; padding: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px;
+        }
+
+        /* Bottom Tab Bar */
+        .tab-bar {
+            position: fixed;
+            bottom: 16px; left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 440px;
+            height: 64px;
+            background: rgba(18, 20, 38, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 90;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 60px;
+        }
+
+        .tab-item svg { width: 22px; height: 22px; stroke: currentColor; transition: 0.2s; }
+        .tab-item.active { color: var(--color-cyan); }
+        .tab-item.active svg { transform: translateY(-2px); }
+
+        /* Watermark Footer */
+        .watermark-footer {
+            display: flex; justify-content: center; align-items: center;
+            margin: 10px 0 10px 0;
+        }
+        .watermark-pill {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 16px; background: var(--glass-bg);
+            backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
+            border-radius: 50px; font-size: 0.72rem; color: rgba(255, 255, 255, 0.6);
+        }
+        .heart { color: #ef4444; animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.25); }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px);
+            z-index: 100; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-content {
+            width: 100%; max-width: 420px;
+            display: flex; flex-direction: column; gap: 14px;
+            max-height: 90vh; overflow-y: auto;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 0.8rem; color: var(--text-muted); }
+        .form-input, .form-select {
+            background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border);
+            color: white; padding: 10px 12px; border-radius: 10px; outline: none; font-size: 0.9rem;
+        }
+        .form-select option { background: #111; color: white; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-cyan), #3b82f6);
+            color: white; border: none; padding: 12px; border-radius: 12px;
+            font-weight: 700; cursor: pointer;
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1); color: white;
+            border: 1px solid var(--glass-border); padding: 8px 12px;
+            border-radius: 10px; font-size: 0.8rem; cursor: pointer;
+        }
+        
+        /* PIN Modal specific */
+        .pin-input {
+            letter-spacing: 12px;
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Orbs Background -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+
+    <div class="app-container">
+        
+        <!-- Navbar -->
+        <div class="navbar">
+            <h1>DODOLANKU</h1>
         </div>
 
-        <p style="font-size:0.75rem; color:var(--text-muted); font-style:italic; margin-top:2px; margin-bottom:10px;">
-            kalo gak tau tanya Frans ya sandinya, jangan di awur
-        </p>
+        <!-- ================= TAB 1: HOME ================= -->
+        <div class="tab-content active" id="tab-home">
+            <!-- Header Staff & Sapaan Jawa Lucu + Animated Cat Avatar (From Tenor) -->
+            <div class="glass-card">
+                <div class="user-row">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <!-- Cute Animated Cat Avatar Frame (Tenor Source - Changes every 1 min) -->
+                        <div class="cat-avatar-frame">
+                            <img id="catAvatarImg" class="cat-avatar-img" src="" alt="Kucing Lucu GIF (Tenor)">
+                        </div>
 
-        <button class="btn-primary" id="btnSubmitPin">Masuk Settings</button>
-        <button class="btn-secondary" id="btnClosePinModal" style="margin-top:4px;">Batal</button>
+                        <div>
+                            <!-- Sapaan Random Bahasa Jawa -->
+                            <div class="welcome" id="javaneseGreeting">Sugeng Makaryo! 🤪</div>
+                            <div class="staff-name" id="staffNameHome">Frans Ganteng</div>
+                        </div>
+                    </div>
+
+                    <div class="status-pill">
+                        <span class="status-dot" id="statusDotHome"></span>
+                        <span id="statusTextHome">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="motivation-box">
+                    💬 <span id="motivationText">Memuat kata motivasi...</span>
+                </div>
+            </div>
+
+            <!-- Tombol Utama Catat Sales Harian -->
+            <button class="btn-action-main" id="openSalesModal">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                Catat Penjualan Harian
+            </button>
+
+            <!-- Card LIVE Pencapaian Hari Ini -->
+            <div class="live-today-card">
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                        <span class="live-badge"><span class="pulse-red"></span> LIVE TODAY</span>
+                        <span style="font-size:0.75rem; color:var(--text-muted);" id="todayDateLabel">Hari Ini</span>
+                    </div>
+                    <div style="font-size:1.4rem; font-weight:800; color:#fff;" id="todayAchievedText">Rp0</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:0.72rem; color:var(--text-muted);">Total Item Terjual</div>
+                    <div style="font-size:1.1rem; font-weight:700; color:var(--color-cyan);" id="todayItemsCount">0 Item</div>
+                </div>
+            </div>
+
+            <!-- Card: Item Produk yang Aku Jual (dengan Tombol Edit Toggle) -->
+            <div class="glass-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <div>
+                        <div class="progress-title" style="margin:0;">🛒 Item produk yang aku jual hari ini</div>
+                        <div style="font-size:0.68rem; color:var(--text-muted);" id="soldCountBadge">0 Transaksi</div>
+                    </div>
+
+                    <!-- Tombol Edit Pensil di Pojok Kanan Atas Card -->
+                    <button class="btn-toggle-edit" id="toggleDeleteBtn" title="Kelola / Hapus Item">
+                        <span id="editIcon">✏️</span> <span id="editText">Edit</span>
+                    </button>
+                </div>
+
+                <!-- List Transaksi Penjualan Hari Ini -->
+                <div id="soldItemsListContainer">
+                    <!-- Rendered Dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: PROGRESS ================= -->
+        <div class="tab-content" id="tab-progress">
+            <!-- Progress Line Card -->
+            <div class="glass-card">
+                <div class="progress-title">Pencapaian Target Bulan Ini</div>
+                <div class="amount-row">
+                    <div class="current-amount" id="totalAchievedText">Rp0</div>
+                    <div class="target-amount" id="targetTotalText">Target: Rp0</div>
+                </div>
+
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div class="progress-subtext">
+                    <span id="percentText" style="color: var(--color-cyan);">0% Achieved</span>
+                    <span id="remainingText" style="color: var(--text-muted);">Sisa: Rp0</span>
+                </div>
+            </div>
+
+            <!-- Breakdown, Top Selling Product & Average Grid (3 Columns) -->
+            <div class="grid-3">
+                <div class="glass-card grid-card">
+                    <div class="label">🎯 Target Harian</div>
+                    <div class="val" id="dailyTargetText">Rp0</div>
+                    <div class="sub">Minimum / hari</div>
+                </div>
+
+                <!-- Item yang sering dijual (Kalkulasi Penjualan Item Terbanyak) -->
+                <div class="glass-card grid-card">
+                    <div class="label">🔥 Top Produk</div>
+                    <div class="val" id="topSellingProductText" title="-">-</div>
+                    <div class="sub" id="topSellingProductSub">0 Item Terjual</div>
+                </div>
+
+                <div class="glass-card grid-card">
+                    <div class="label">📈 Rata Sales</div>
+                    <div class="val" id="dailyAverageText">Rp0</div>
+                    <div class="sub" id="performanceCategoryText">Status Performa</div>
+                </div>
+            </div>
+
+            <!-- Chart Penjualan -->
+            <div class="glass-card">
+                <div class="progress-title">Grafik Tren Penjualan Harian</div>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Kalender History -->
+            <div class="glass-card">
+                <div class="progress-title">Kalender & Detail Riwayat Harian</div>
+                <input type="date" id="calendarPicker" class="calendar-picker">
+
+                <div class="history-card" id="historyDetailCard">
+                    <div>
+                        <div style="font-size: 0.85rem; font-weight: 700; color: var(--color-cyan);" id="historyDateText">Pilih Tanggal</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; margin-top: 2px;" id="historyAmountText">Rp0</div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted);" id="historyItemsText">0 Item Terjual</div>
+                    </div>
+                    <div id="historyBadge" style="font-size: 1.3rem;">📊</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: SETTINGS ================= -->
+        <div class="tab-content" id="tab-settings">
+            <!-- Profil & Target Form -->
+            <div class="glass-card">
+                <h3 style="margin-bottom: 12px; font-size:1rem;">👤 Profil Staff & Target</h3>
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label>Nama Staff</label>
+                    <input type="text" id="inputStaffName" class="form-input">
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Target Total Bulanan (Rp)</label>
+                    <input type="number" id="inputTotalTarget" class="form-input">
+                </div>
+                <button class="btn-primary" id="saveProfileBtn">Simpan Profil & Target</button>
+            </div>
+
+            <!-- Kelola Master Produk Target -->
+            <div class="glass-card">
+                <h3 style="margin-bottom: 4px; font-size:1rem;">📦 Master Item Produk</h3>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Daftar pilihan opsi produk yang kamu jual.</p>
+                
+                <div class="form-group" style="margin-bottom:8px;">
+                    <label>Nama Produk Baru</label>
+                    <input type="text" id="newProdName" class="form-input" placeholder="Contoh: Paket VIP">
+                </div>
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label>Harga Satuan Produk (Rp)</label>
+                    <input type="number" id="newProdPrice" class="form-input" placeholder="Contoh: 500000">
+                </div>
+                <button class="btn-secondary" id="btnAddMasterProduct" style="width:100%; margin-bottom:14px;">+ Tambah Ke Master Produk</button>
+
+                <div class="progress-title">Daftar Produk Master Saat Ini:</div>
+                <div id="masterProductListContainer" style="display:flex; flex-direction:column; gap:8px;">
+                    <!-- Master Products list -->
+                </div>
+            </div>
+
+            <!-- Tombol Reset Data Aplikasi -->
+            <div class="glass-card" style="border: 1px solid rgba(239,68,68,0.3);">
+                <h3 style="color:#fca5a5; font-size:0.95rem; margin-bottom:6px;">⚠️ Ojo di demek iki angker</h3>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Hapus seluruh data transaksi penjualan dan kembali ke setelan awal.</p>
+                <button class="btn-danger" id="resetDataBtn" style="width:100%;">🔄 Reset Semua Data Aplikasi</button>
+            </div>
+        </div>
+
+        <!-- Watermark Footer -->
+        <div class="watermark-footer">
+            <div class="watermark-pill">
+                <span>made with</span>
+                <span class="heart">❤️</span>
+                <span>by <strong>frans</strong></span>
+            </div>
+        </div>
+
     </div>
-</div>
+
+    <!-- BOTTOM TAB BAR NAVIGATION -->
+    <div class="tab-bar">
+        <div class="tab-item active" data-tab="tab-home">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span>Beranda</span>
+        </div>
+        <div class="tab-item" data-tab="tab-progress">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span>Progress</span>
+        </div>
+        <div class="tab-item" id="tabItemSettings" data-tab="tab-settings">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span>Settings</span>
+        </div>
+    </div>
+
+    <!-- MODAL 1: Input Sales Harian -->
+    <div class="modal" id="salesModal">
+        <div class="glass-card modal-content">
+            <h3 style="margin-bottom: 4px;">📝 Catat Penjualan Baru</h3>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">Pilih atau isi produk yang terjual hari ini.</p>
+            
+            <div class="form-group">
+                <label>Tanggal Transaksi</label>
+                <input type="date" id="salesInputDate" class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label>Pilih Item Produk Master</label>
+                <select id="salesProductSelect" class="form-select">
+                    <option value="">-- Isi Manual / Custom Item --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Nama Produk / Deskripsi</label>
+                <input type="text" id="salesInputName" class="form-input" placeholder="Nama Produk Terjual">
+            </div>
+
+            <div class="form-group">
+                <label>Harga Satuan (Rp)</label>
+                <input type="number" id="salesInputUnitPrice" class="form-input" placeholder="Harga 1 item, contoh: 1500000">
+            </div>
+
+            <div class="form-group">
+                <label>Jumlah Item (Qty)</label>
+                <input type="number" id="salesInputQty" class="form-input" value="1" min="1">
+            </div>
+
+            <!-- Total Preview -->
+            <div style="background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.3); border-radius:12px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.8rem; color:var(--text-muted);">Total Perhitungan:</span>
+                <span style="font-size:1.1rem; font-weight:800; color:var(--color-cyan);" id="salesTotalCalcPreview">Rp0</span>
+            </div>
+
+            <button class="btn-primary" id="saveSalesBtn" style="margin-top:10px;">Simpan Transaksi Sales</button>
+            <button class="btn-secondary" id="closeSalesModal">Batal</button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: PIN Lock Modal Settings -->
+    <div class="modal" id="pinModal">
+        <div class="glass-card modal-content" style="max-width:340px; text-align:center;">
+            <div style="font-size:2.5rem; margin-bottom:4px;">🔒</div>
+            <h3 style="font-size:1.1rem; margin-bottom:4px;">Lebokno sandine sek.</h3>
+            <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">Masukkan 4-digit sandi untuk masuk ke Settings.</p>
+            
+            <div class="form-group">
+                <input type="password" id="pinInputCode" class="form-input pin-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+            </div>
+
+            <p style="font-size:0.75rem; color:var(--text-muted); font-style:italic; margin-top:2px; margin-bottom:10px;">
+                kalo gak tau tanya Frans ya sandinya, jangan di awur
+            </p>
+
+            <button class="btn-primary" id="btnSubmitPin">Masuk Settings</button>
+            <button class="btn-secondary" id="btnClosePinModal" style="margin-top:4px;">Batal</button>
+        </div>
+    </div>
+
+    <script>
+        // --- INITIAL STATE ---
+        const DEFAULT_STATE = {
+            staffName: "Frans Ganteng",
+            totalTarget: 30000000,
+            masterProducts: [
+                { id: 'p1', name: "Paket Premium A", price: 1500000 },
+                { id: 'p2', name: "Paket Standar B", price: 750000 },
+                { id: 'p3', name: "Add-on Service", price: 250000 }
+            ],
+            salesTransactions: []
+        };
+
+        let appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+        let isEditModeSoldItems = false;
+        
+        // Lock Settings state with timestamp relock (5 minutes)
+        let settingsUnlockedAt = null; 
+        const SETTINGS_PIN = "0987";
+        const RELOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 Menit (300,000 ms)
+
+        // Cute Animated Cat GIFs directly sourced from Tenor (https://tenor.com/en-GB/search/kucing-lucu-gifs)
+        const catGifUrls = [
+            "https://media.tenor.com/images/ea3c0718fad81076af184599bb55332a/tenor.gif",
+            "https://media.tenor.com/images/eff22afc2220e9df92a7aa2f53948f9f/tenor.gif",
+            "https://media.tenor.com/images/e0f28542d811073f2b3d223e8ed119f3/tenor.gif",
+            "https://media.tenor.com/images/75b3c8eca95d917c650cd574b91db7f7/tenor.gif",
+            "https://media.tenor.com/images/80aa0a25bee9defa1d1d7ecaab75f3f4/tenor.gif",
+            "https://media.tenor.com/LSI81MmB6gEAAAAC/cat-fear.gif",
+            "https://media.tenor.com/M8lH_e6QeyMAAAAC/cat.gif",
+            "https://media.tenor.com/cgHxc_n20ccAAAAC/cat-angry-cat.gif",
+            "https://media.tenor.com/jzQJN2e0QvIAAAAC/cat.gif",
+            "https://media.tenor.com/LPLwwL9Rx6oAAAAC/paws-playing.gif"
+        ];
+
+        // List Sapaan Jawa Lucu
+        const javaneseGreetings = [
+            "Sugeng Makaryo, Ojo Ngelamun Wae! 🤪",
+            "Semangat Cari Cuan, Kanggo Tuku Seblak! 🍜",
+            "Nyambut Gawe Sing Sregep, Ojo Turu Wae! 😴",
+            "Kerjo Sing Tenanan, Ben Ora Dijodohne Simbok! 😁",
+            "Ora Kerjo Ora Mangan, Ndang Semangat! 🔥",
+            "Semangat Bosque, Target Menanti Ojo Patah Hati! 💔",
+            "Ayo Kerjo, Ben Iso Tuku Kopi Hits! ☕",
+            "Ojo Kendor, Duit Ora Teko Soko Langit! 💸"
+        ];
+
+        const motivationalQuotes = [
+            "Hari ini adalah peluang baru,",
+            "Konsistensi adalah kunci keberhasilan,",
+            "Setiap langkah kecil membawamu lebih dekat ke target,",
+            "Tetap fokus dan berikan pelayanan terbaik,",
+            "Kerja kerasmu hari ini menentukan hasil besok,",
+            "Semangat melampaui batas hari ini,"
+        ];
+
+        let chartInstance = null;
+
+        function formatIDR(val) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+        }
+
+        function formatDateKey(dateObj) {
+            return dateObj.toISOString().split('T')[0];
+        }
+
+        function generateDummyTransactions() {
+            const today = new Date();
+            const todayStr = formatDateKey(today);
+            const dummy = [];
+            
+            dummy.push({
+                id: 'tx_today_1',
+                date: todayStr,
+                productName: "Paket Standar B",
+                unitPrice: 750000,
+                qty: 1,
+                totalAmount: 750000
+            });
+            dummy.push({
+                id: 'tx_today_2',
+                date: todayStr,
+                productName: "Paket Premium A",
+                unitPrice: 1500000,
+                qty: 4,
+                totalAmount: 6000000
+            });
+
+            for (let i = 1; i < 7; i++) {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                const dateStr = formatDateKey(d);
+                const prod = appState.masterProducts[i % appState.masterProducts.length];
+                const qty = (i % 2) + 1;
+                const unitPrice = prod ? prod.price : 500000;
+                dummy.push({
+                    id: 'tx_' + Date.now() + '_' + i,
+                    date: dateStr,
+                    productName: prod ? prod.name : "Penjualan Direct",
+                    unitPrice: unitPrice,
+                    qty: qty,
+                    totalAmount: unitPrice * qty
+                });
+            }
+            appState.salesTransactions = dummy;
+        }
+
+        // --- TIMER SAPAAN, MOTIVASI & TENOR CAT GIF (60 DETIK) ---
+        function updatePeriodicHeaderContent() {
+            const randomGreeting = javaneseGreetings[Math.floor(Math.random() * javaneseGreetings.length)];
+            const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+            const randomCatGif = catGifUrls[Math.floor(Math.random() * catGifUrls.length)];
+            
+            const greetingEl = document.getElementById('javaneseGreeting');
+            const motivationEl = document.getElementById('motivationText');
+            const catImgEl = document.getElementById('catAvatarImg');
+
+            greetingEl.style.opacity = 0;
+            motivationEl.style.opacity = 0;
+            catImgEl.style.opacity = 0;
+
+            setTimeout(() => {
+                greetingEl.textContent = randomGreeting;
+                motivationEl.textContent = `${randomQuote} ${appState.staffName}!`;
+                catImgEl.src = randomCatGif;
+                
+                greetingEl.style.opacity = 1;
+                motivationEl.style.opacity = 1;
+                catImgEl.style.opacity = 1;
+            }, 300);
+        }
+
+        // --- TAB NAVIGATION WITH PIN PROTECTION & 5 MINUTE RELOCK ---
+        function initTabBar() {
+            const tabItems = document.querySelectorAll('.tab-item');
+
+            tabItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const targetTab = item.getAttribute('data-tab');
+
+                    if (targetTab === 'tab-settings') {
+                        const now = Date.now();
+                        const isStillValid = settingsUnlockedAt && (now - settingsUnlockedAt < RELOCK_TIMEOUT_MS);
+
+                        if (!isStillValid) {
+                            settingsUnlockedAt = null;
+                            e.preventDefault();
+                            document.getElementById('pinInputCode').value = '';
+                            document.getElementById('pinModal').style.display = 'flex';
+                            document.getElementById('pinInputCode').focus();
+                            return;
+                        }
+                    }
+
+                    switchTab(targetTab);
+                });
+            });
+        }
+
+        function switchTab(targetTab) {
+            const tabItems = document.querySelectorAll('.tab-item');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabItems.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            const activeBtn = document.querySelector(`.tab-item[data-tab="${targetTab}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            const activeContent = document.getElementById(targetTab);
+            if (activeContent) activeContent.classList.add('active');
+
+            if (targetTab === 'tab-progress') {
+                setTimeout(renderChart, 100);
+            }
+        }
+
+        function renderSoldItems() {
+            const container = document.getElementById('soldItemsListContainer');
+            const badge = document.getElementById('soldCountBadge');
+            container.innerHTML = '';
+
+            const todayStr = formatDateKey(new Date());
+            const todayTx = appState.salesTransactions.filter(tx => tx.date === todayStr);
+
+            badge.textContent = `${todayTx.length} Transaksi Hari Ini`;
+
+            if (todayTx.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding: 24px 0; color:var(--text-muted); font-size:0.82rem; font-style:italic;">
+                        Belum ada item produk yang dijual hari ini.<br>
+                        <span style="font-size:0.72rem; color:var(--color-cyan);">Daftar otomatis bersih/reset setiap berganti tanggal.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            const sorted = [...todayTx].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            sorted.forEach(tx => {
+                const totalCalculated = tx.totalAmount || (tx.unitPrice * tx.qty) || (tx.amount * tx.qty);
+                const unitP = tx.unitPrice || tx.amount || (tx.totalAmount / tx.qty);
+
+                const card = document.createElement('div');
+                card.className = 'sold-item-card';
+                card.innerHTML = `
+                    <div>
+                        <div style="font-size:0.85rem; font-weight:700;">${tx.productName}</div>
+                        <div style="font-size:0.85rem; color:var(--color-cyan); font-weight:800; margin-top:2px;">
+                            ${formatIDR(totalCalculated)} 
+                            <span style="font-size:0.72rem; color:var(--text-muted); font-weight:400;">
+                                (${tx.qty}x @ ${formatIDR(unitP)})
+                            </span>
+                        </div>
+                        <div style="font-size:0.68rem; color:var(--text-muted); margin-top:2px;">📅 ${tx.date}</div>
+                    </div>
+                    <button class="btn-icon-delete ${isEditModeSoldItems ? 'show' : ''}" onclick="deleteSalesTransaction('${tx.id}')" title="Hapus Transaksi Ini">
+                        🗑️
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        document.getElementById('toggleDeleteBtn').addEventListener('click', () => {
+            isEditModeSoldItems = !isEditModeSoldItems;
+            const btn = document.getElementById('toggleDeleteBtn');
+            const editText = document.getElementById('editText');
+
+            if (isEditModeSoldItems) {
+                btn.classList.add('active');
+                editText.textContent = 'Selesai';
+            } else {
+                btn.classList.remove('active');
+                editText.textContent = 'Edit';
+            }
+            renderSoldItems();
+        });
+
+        window.deleteSalesTransaction = function(txId) {
+            if (confirm("Apakah Anda yakin ingin menghapus catatan penjualan ini?")) {
+                appState.salesTransactions = appState.salesTransactions.filter(t => t.id !== txId);
+                updateUI();
+            }
+        };
+
+        function renderMasterProducts() {
+            const container = document.getElementById('masterProductListContainer');
+            const selectEl = document.getElementById('salesProductSelect');
+            container.innerHTML = '';
+            selectEl.innerHTML = '<option value="">-- Isi Manual / Custom Item --</option>';
+
+            appState.masterProducts.forEach(prod => {
+                const opt = document.createElement('option');
+                opt.value = prod.id;
+                opt.textContent = `${prod.name} - ${formatIDR(prod.price)}`;
+                selectEl.appendChild(opt);
+
+                const itemRow = document.createElement('div');
+                itemRow.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.08);";
+                itemRow.innerHTML = `
+                    <div>
+                        <div style="font-size:0.85rem; font-weight:700;">${prod.name}</div>
+                        <div style="font-size:0.75rem; color:var(--color-cyan); font-weight:600;">${formatIDR(prod.price)} / item</div>
+                    </div>
+                    <button class="btn-icon-delete show" onclick="deleteMasterProduct('${prod.id}')" title="Hapus Produk Master">
+                        🗑️
+                    </button>
+                `;
+                container.appendChild(itemRow);
+            });
+        }
+
+        window.deleteMasterProduct = function(prodId) {
+            if (confirm("Apakah Anda yakin ingin menghapus produk ini dari daftar master?")) {
+                appState.masterProducts = appState.masterProducts.filter(p => p.id !== prodId);
+                renderMasterProducts();
+            }
+        };
+
+        function updateModalCalcPreview() {
+            const unitPrice = parseFloat(document.getElementById('salesInputUnitPrice').value) || 0;
+            const qty = parseInt(document.getElementById('salesInputQty').value) || 1;
+            const total = unitPrice * qty;
+            document.getElementById('salesTotalCalcPreview').textContent = formatIDR(total);
+        }
+
+        function updateUI() {
+            document.getElementById('staffNameHome').textContent = appState.staffName;
+            document.getElementById('inputStaffName').value = appState.staffName;
+            document.getElementById('inputTotalTarget').value = appState.totalTarget;
+
+            const todayStr = formatDateKey(new Date());
+            const todayTransactions = appState.salesTransactions.filter(tx => tx.date === todayStr);
+            const todayAchieved = todayTransactions.reduce((acc, curr) => acc + (curr.totalAmount || (curr.unitPrice * curr.qty) || curr.amount), 0);
+            const todayItemsCount = todayTransactions.reduce((acc, curr) => acc + curr.qty, 0);
+
+            document.getElementById('todayAchievedText').textContent = formatIDR(todayAchieved);
+            document.getElementById('todayItemsCount').textContent = `${todayItemsCount} Item`;
+            document.getElementById('todayDateLabel').textContent = todayStr;
+
+            const totalAchieved = appState.salesTransactions.reduce((acc, curr) => acc + (curr.totalAmount || (curr.unitPrice * curr.qty) || curr.amount), 0);
+            const progressRatio = appState.totalTarget > 0 ? Math.min(totalAchieved / appState.totalTarget, 1) : 0;
+            const percentage = Math.round(progressRatio * 100);
+
+            document.getElementById('totalAchievedText').textContent = formatIDR(totalAchieved);
+            document.getElementById('targetTotalText').textContent = `Target: ${formatIDR(appState.totalTarget)}`;
+            document.getElementById('percentText').textContent = `${percentage}% Achieved`;
+
+            const remaining = Math.max(appState.totalTarget - totalAchieved, 0);
+            document.getElementById('remainingText').textContent = `Sisa: ${formatIDR(remaining)}`;
+
+            const fillEl = document.getElementById('progressFill');
+            const dotEl = document.getElementById('statusDotHome');
+            const statusTextEl = document.getElementById('statusTextHome');
+
+            fillEl.style.width = `${percentage}%`;
+
+            let colorHex = '#ef4444';
+            let statusStr = 'Low Sales';
+
+            if (percentage >= 85) {
+                colorHex = '#22c55e';
+                statusStr = percentage >= 100 ? 'Target Goal! 🏆' : 'Mendekati Goal 🔥';
+            } else if (percentage >= 50) {
+                colorHex = '#eab308';
+                statusStr = 'Performa Sedang ⚡';
+            }
+
+            fillEl.style.backgroundColor = colorHex;
+            dotEl.style.backgroundColor = colorHex;
+            statusTextEl.textContent = statusStr;
+            statusTextEl.style.color = colorHex;
+
+            const dailyTarget = appState.totalTarget / 30;
+            document.getElementById('dailyTargetText').textContent = formatIDR(dailyTarget);
+
+            // --- Kalkulasi Item Terbanyak (Top Selling Product) ---
+            const productQtyMap = {};
+            appState.salesTransactions.forEach(tx => {
+                const pName = tx.productName || "Direct Sales";
+                const qty = tx.qty || 1;
+                productQtyMap[pName] = (productQtyMap[pName] || 0) + qty;
+            });
+
+            let topProduct = "-";
+            let maxQty = 0;
+            for (const [name, qty] of Object.entries(productQtyMap)) {
+                if (qty > maxQty) {
+                    maxQty = qty;
+                    topProduct = name;
+                }
+            }
+
+            const topProdEl = document.getElementById('topSellingProductText');
+            const topProdSubEl = document.getElementById('topSellingProductSub');
+            if (topProdEl && topProdSubEl) {
+                topProdEl.textContent = topProduct;
+                topProdEl.title = topProduct;
+                topProdSubEl.textContent = `${maxQty} Item Terjual`;
+            }
+
+            const groupedByDate = {};
+            appState.salesTransactions.forEach(tx => {
+                const amt = tx.totalAmount || (tx.unitPrice * tx.qty) || tx.amount;
+                groupedByDate[tx.date] = (groupedByDate[tx.date] || 0) + amt;
+            });
+
+            const uniqueDaysCount = Object.keys(groupedByDate).length || 1;
+            const dailyAverage = totalAchieved / uniqueDaysCount;
+            document.getElementById('dailyAverageText').textContent = formatIDR(dailyAverage);
+
+            const perfCategoryEl = document.getElementById('performanceCategoryText');
+            const avgRatio = dailyAverage / dailyTarget;
+            if (avgRatio >= 1.0) {
+                perfCategoryEl.textContent = "Sangat Baik (High)";
+                perfCategoryEl.style.color = "var(--color-green)";
+            } else if (avgRatio >= 0.6) {
+                perfCategoryEl.textContent = "Sedang (Moderate)";
+                perfCategoryEl.style.color = "var(--color-yellow)";
+            } else {
+                perfCategoryEl.textContent = "Perlu Peningkatan (Low)";
+                perfCategoryEl.style.color = "var(--color-red)";
+            }
+
+            renderSoldItems();
+            renderMasterProducts();
+            renderChart();
+            updateHistoryDetail();
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('salesChart');
+            if (!ctx) return;
+
+            const grouped = {};
+            appState.salesTransactions.forEach(tx => {
+                const amt = tx.totalAmount || (tx.unitPrice * tx.qty) || tx.amount;
+                grouped[tx.date] = (grouped[tx.date] || 0) + amt;
+            });
+
+            const sortedKeys = Object.keys(grouped).sort();
+            const labels = sortedKeys.map(k => {
+                const parts = k.split('-');
+                return `${parts[2]}/${parts[1]}`;
+            });
+            const dataValues = sortedKeys.map(k => grouped[k]);
+
+            if (chartInstance) chartInstance.destroy();
+
+            const chartCtx = ctx.getContext('2d');
+            const gradient = chartCtx.createLinearGradient(0, 0, 0, 180);
+            gradient.addColorStop(0, 'rgba(6, 182, 212, 0.4)');
+            gradient.addColorStop(1, 'rgba(6, 182, 212, 0)');
+
+            chartInstance = new Chart(chartCtx, {
+                type: 'line',
+                data: {
+                    labels: labels.length > 0 ? labels : ['HARI INI'],
+                    datasets: [{
+                        label: 'Penjualan',
+                        data: dataValues.length > 0 ? dataValues : [0],
+                        borderColor: '#06b6d4',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: gradient,
+                        pointBackgroundColor: '#ffffff',
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.08)' }, ticks: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function updateHistoryDetail() {
+            const dateVal = document.getElementById('calendarPicker').value;
+            const dailyTarget = appState.totalTarget / 30;
+
+            const filteredTx = appState.salesTransactions.filter(tx => tx.date === dateVal);
+            const totalAmount = filteredTx.reduce((sum, t) => sum + (t.totalAmount || (t.unitPrice * t.qty) || t.amount), 0);
+            const totalItems = filteredTx.reduce((sum, t) => sum + t.qty, 0);
+
+            if (dateVal && filteredTx.length > 0) {
+                document.getElementById('historyDateText').textContent = `Tanggal: ${dateVal}`;
+                document.getElementById('historyAmountText').textContent = formatIDR(totalAmount);
+                document.getElementById('historyItemsText').textContent = `${totalItems} Item Terjual (${filteredTx.length} Transaksi)`;
+                document.getElementById('historyBadge').textContent = totalAmount >= dailyTarget ? '✅' : '⚠️';
+            } else {
+                document.getElementById('historyDateText').textContent = dateVal ? `Tanggal: ${dateVal}` : 'Pilih Tanggal';
+                document.getElementById('historyAmountText').textContent = 'Rp0';
+                document.getElementById('historyItemsText').textContent = 'Tidak ada catatan transaksi';
+                document.getElementById('historyBadge').textContent = '📂';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initTabBar();
+            generateDummyTransactions();
+
+            const todayStr = formatDateKey(new Date());
+            document.getElementById('calendarPicker').value = todayStr;
+            document.getElementById('salesInputDate').value = todayStr;
+
+            updatePeriodicHeaderContent();
+            updateUI();
+
+            setInterval(updatePeriodicHeaderContent, 60000);
+
+            document.getElementById('calendarPicker').addEventListener('change', updateHistoryDetail);
+
+            const salesModal = document.getElementById('salesModal');
+            document.getElementById('openSalesModal').addEventListener('click', () => {
+                salesModal.style.display = 'flex';
+                updateModalCalcPreview();
+            });
+            document.getElementById('closeSalesModal').addEventListener('click', () => {
+                salesModal.style.display = 'none';
+            });
+
+            document.getElementById('salesProductSelect').addEventListener('change', (e) => {
+                const selectedId = e.target.value;
+                const found = appState.masterProducts.find(p => p.id === selectedId);
+                if (found) {
+                    document.getElementById('salesInputName').value = found.name;
+                    document.getElementById('salesInputUnitPrice').value = found.price;
+                    updateModalCalcPreview();
+                }
+            });
+
+            document.getElementById('salesInputUnitPrice').addEventListener('input', updateModalCalcPreview);
+            document.getElementById('salesInputQty').addEventListener('input', updateModalCalcPreview);
+
+            document.getElementById('saveSalesBtn').addEventListener('click', () => {
+                const dateVal = document.getElementById('salesInputDate').value;
+                const nameVal = document.getElementById('salesInputName').value.trim() || "Penjualan Direct";
+                const unitPrice = parseFloat(document.getElementById('salesInputUnitPrice').value);
+                const qtyVal = parseInt(document.getElementById('salesInputQty').value) || 1;
+
+                if (!dateVal || isNaN(unitPrice) || unitPrice <= 0 || qtyVal < 1) {
+                    alert('Mohon isi tanggal, harga satuan, dan jumlah item yang valid.');
+                    return;
+                }
+
+                const totalAmount = unitPrice * qtyVal;
+
+                appState.salesTransactions.push({
+                    id: 'tx_' + Date.now(),
+                    date: dateVal,
+                    productName: nameVal,
+                    unitPrice: unitPrice,
+                    qty: qtyVal,
+                    totalAmount: totalAmount
+                });
+
+                document.getElementById('salesInputName').value = '';
+                document.getElementById('salesInputUnitPrice').value = '';
+                document.getElementById('salesInputQty').value = '1';
+                salesModal.style.display = 'none';
+
+                updateUI();
+            });
+
+            const pinModal = document.getElementById('pinModal');
+            document.getElementById('btnSubmitPin').addEventListener('click', () => {
+                const code = document.getElementById('pinInputCode').value;
+                if (code === SETTINGS_PIN) {
+                    settingsUnlockedAt = Date.now();
+                    pinModal.style.display = 'none';
+                    switchTab('tab-settings');
+                } else {
+                    alert('Sandi salah! Tanya Frans dhisik 😁');
+                    document.getElementById('pinInputCode').value = '';
+                }
+            });
+
+            document.getElementById('btnClosePinModal').addEventListener('click', () => {
+                pinModal.style.display = 'none';
+            });
+
+            document.getElementById('saveProfileBtn').addEventListener('click', () => {
+                const newName = document.getElementById('inputStaffName').value.trim();
+                const newTarget = parseFloat(document.getElementById('inputTotalTarget').value);
+
+                if (newName) appState.staffName = newName;
+                if (!isNaN(newTarget) && newTarget > 0) appState.totalTarget = newTarget;
+
+                alert('Profil & Target berhasil diperbarui!');
+                updatePeriodicHeaderContent();
+                updateUI();
+            });
+
+            document.getElementById('btnAddMasterProduct').addEventListener('click', () => {
+                const name = document.getElementById('newProdName').value.trim();
+                const price = parseFloat(document.getElementById('newProdPrice').value);
+
+                if (name && !isNaN(price) && price > 0) {
+                    appState.masterProducts.push({ id: 'p_' + Date.now(), name: name, price: price });
+                    document.getElementById('newProdName').value = '';
+                    document.getElementById('newProdPrice').value = '';
+                    renderMasterProducts();
+                } else {
+                    alert('Mohon masukkan nama produk dan harga melek.');
+                }
+            });
+
+            document.getElementById('resetDataBtn').addEventListener('click', () => {
+                if (confirm("PERINGATAN: Seluruh data penjualan dan target akan di-reset ke setelan awal. Lanjutkan?")) {
+                    appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+                    document.getElementById('salesInputDate').value = todayStr;
+                    updatePeriodicHeaderContent();
+                    updateUI();
+                    alert('Seluruh data aplikasi telah berhasil di-reset.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
