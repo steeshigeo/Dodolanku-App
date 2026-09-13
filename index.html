@@ -153,15 +153,23 @@
         .status-pill {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 14px;
+            gap: 6px;
+            padding: 6px 12px;
             border-radius: 50px;
             background: rgba(0, 0, 0, 0.25);
             border: 1px solid var(--glass-border);
-            font-size: 0.75rem;
+            font-size: 0.68rem;
             font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+            flex-shrink: 0;
+        }
 
         .motivation-box {
             display: flex;
@@ -266,7 +274,7 @@
             width: 32px;
             height: 32px;
             border-radius: 8px;
-            display: none; /* Default Hidden */
+            display: none;
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -302,12 +310,21 @@
 
         .chart-container { position: relative; height: 180px; width: 100%; margin-top: 10px; }
 
+        /* Custom Date Picker - Compact Rounded Left */
         .calendar-picker {
-            width: 100%; background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border); color: white;
-            padding: 10px 14px; border-radius: 12px; font-size: 0.9rem;
-            outline: none; color-scheme: dark;
+            width: auto;
+            max-width: 160px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            outline: none;
+            color-scheme: dark;
+            display: inline-block;
         }
+
         .history-card {
             background: rgba(255, 255, 255, 0.04);
             border-radius: 14px; padding: 14px;
@@ -439,13 +456,11 @@
             <div class="glass-card">
                 <div class="user-row">
                     <div style="display:flex; align-items:center; gap:12px;">
-                        <!-- Cute Animated Cat Avatar Frame (Tenor Source - Changes every 1 min) -->
                         <div class="cat-avatar-frame">
                             <img id="catAvatarImg" class="cat-avatar-img" src="" alt="Kucing Lucu GIF (Tenor)">
                         </div>
 
                         <div>
-                            <!-- Sapaan Random Bahasa Jawa -->
                             <div class="welcome" id="javaneseGreeting">Sugeng Makaryo! 🤪</div>
                             <div class="staff-name" id="staffNameHome">Frans Ganteng</div>
                         </div>
@@ -483,7 +498,7 @@
                 </div>
             </div>
 
-            <!-- Card: Item Produk yang Aku Jual (dengan Tombol Edit Toggle) -->
+            <!-- Card: Item Produk yang Aku Jual -->
             <div class="glass-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div>
@@ -491,13 +506,11 @@
                         <div style="font-size:0.68rem; color:var(--text-muted);" id="soldCountBadge">0 Transaksi</div>
                     </div>
 
-                    <!-- Tombol Edit Pensil di Pojok Kanan Atas Card -->
                     <button class="btn-toggle-edit" id="toggleDeleteBtn" title="Kelola / Hapus Item">
                         <span id="editIcon">✏️</span> <span id="editText">Edit</span>
                     </button>
                 </div>
 
-                <!-- List Transaksi Penjualan Hari Ini -->
                 <div id="soldItemsListContainer">
                     <!-- Rendered Dynamically -->
                 </div>
@@ -524,7 +537,7 @@
                 </div>
             </div>
 
-            <!-- Breakdown, Top Selling Product & Average Grid (3 Columns) -->
+            <!-- Breakdown Grid (3 Columns) -->
             <div class="grid-3">
                 <div class="glass-card grid-card">
                     <div class="label">🎯 Target Harian</div>
@@ -532,7 +545,6 @@
                     <div class="sub">Minimum / hari</div>
                 </div>
 
-                <!-- Item yang sering dijual (Kalkulasi Penjualan Item Terbanyak) -->
                 <div class="glass-card grid-card">
                     <div class="label">🔥 Top Produk</div>
                     <div class="val" id="topSellingProductText" title="-">-</div>
@@ -557,7 +569,9 @@
             <!-- Kalender History -->
             <div class="glass-card">
                 <div class="progress-title">Kalender & Detail Riwayat Harian</div>
-                <input type="date" id="calendarPicker" class="calendar-picker">
+                <div style="text-align: left;">
+                    <input type="date" id="calendarPicker" class="calendar-picker">
+                </div>
 
                 <div class="history-card" id="historyDetailCard">
                     <div>
@@ -675,7 +689,6 @@
                 <input type="number" id="salesInputQty" class="form-input" value="1" min="1">
             </div>
 
-            <!-- Total Preview -->
             <div style="background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.3); border-radius:12px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size:0.8rem; color:var(--text-muted);">Total Perhitungan:</span>
                 <span style="font-size:1.1rem; font-weight:800; color:var(--color-cyan);" id="salesTotalCalcPreview">Rp0</span>
@@ -707,7 +720,6 @@
     </div>
 
     <script>
-        // --- INITIAL STATE DEFAULT ---
         const DEFAULT_STATE = {
             staffName: "Frans Ganteng",
             totalTarget: 30000000,
@@ -722,12 +734,10 @@
         let appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
         let isEditModeSoldItems = false;
         
-        // Lock Settings state with timestamp relock (5 minutes)
         let settingsUnlockedAt = null; 
         const SETTINGS_PIN = "0987";
-        const RELOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 Menit (300,000 ms)
+        const RELOCK_TIMEOUT_MS = 5 * 60 * 1000;
 
-        // Tenor Cute Cat GIFs
         const catGifUrls = [
             "https://media.tenor.com/images/ea3c0718fad81076af184599bb55332a/tenor.gif",
             "https://media.tenor.com/images/eff22afc2220e9df92a7aa2f53948f9f/tenor.gif",
@@ -741,7 +751,6 @@
             "https://media.tenor.com/LPLwwL9Rx6oAAAAC/paws-playing.gif"
         ];
 
-        // Sapaan Bahasa Jawa
         const javaneseGreetings = [
             "Sugeng Makaryo, Ojo Ngelamun Wae! 🤪",
             "Semangat Cari Cuan, Kanggo Tuku Seblak! 🍜",
@@ -764,7 +773,6 @@
 
         let chartInstance = null;
 
-        // --- MANAJEMEN PERSISTENSI LOCAL STORAGE ---
         function saveState() {
             try {
                 localStorage.setItem('DODOLANKU_APP_DATA', JSON.stringify(appState));
@@ -837,7 +845,6 @@
             appState.salesTransactions = dummy;
         }
 
-        // --- TIMER SAPAAN, MOTIVASI & TENOR CAT GIF (60 DETIK) ---
         function updatePeriodicHeaderContent() {
             const randomGreeting = javaneseGreetings[Math.floor(Math.random() * javaneseGreetings.length)];
             const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
@@ -862,7 +869,6 @@
             }, 300);
         }
 
-        // --- NAVIGATION & LOCKING ---
         function initTabBar() {
             const tabItems = document.querySelectorAll('.tab-item');
 
@@ -1069,7 +1075,6 @@
             const dailyTarget = appState.totalTarget / 30;
             document.getElementById('dailyTargetText').textContent = formatIDR(dailyTarget);
 
-            // --- Kalkulasi Item Terbanyak (Top Selling Product) ---
             const productQtyMap = {};
             appState.salesTransactions.forEach(tx => {
                 const pName = tx.productName || "Direct Sales";
@@ -1198,8 +1203,6 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             initTabBar();
-            
-            // Load persistent state
             loadState();
 
             const todayStr = formatDateKey(new Date());
@@ -1257,7 +1260,7 @@
                     totalAmount: totalAmount
                 });
 
-                saveState(); // Simpan Otomatis
+                saveState();
 
                 document.getElementById('salesInputName').value = '';
                 document.getElementById('salesInputUnitPrice').value = '';
@@ -1291,7 +1294,7 @@
                 if (newName) appState.staffName = newName;
                 if (!isNaN(newTarget) && newTarget > 0) appState.totalTarget = newTarget;
 
-                saveState(); // Simpan Otomatis
+                saveState();
                 alert('Profil & Target berhasil diperbarui!');
                 updatePeriodicHeaderContent();
                 updateUI();
@@ -1303,7 +1306,7 @@
 
                 if (name && !isNaN(price) && price > 0) {
                     appState.masterProducts.push({ id: 'p_' + Date.now(), name: name, price: price });
-                    saveState(); // Simpan Otomatis
+                    saveState();
                     document.getElementById('newProdName').value = '';
                     document.getElementById('newProdPrice').value = '';
                     renderMasterProducts();
