@@ -843,7 +843,7 @@
             "https://media.tenor.com/LPLwwL9Rx6oAAAAC/paws-playing.gif"
         ];
 
-        // Daftar Sapaan Jawa Terbaru (Random Setiap Menit)
+        // Daftar Sapaan Jawa Terbaru
         const customGreetings = [
             "Piye kabare?",
             "Uwes madhang?",
@@ -895,7 +895,7 @@
 
         let chartInstance = null;
 
-        // --- SISTEM TEMA LIGHT / DARK MODE (DEFAULT SESUAI PERANGKAT) ---
+        // SISTEM TEMA LIGHT / DARK MODE (DEFAULT PERANGKAT)
         function initTheme() {
             const savedTheme = localStorage.getItem('DODOLANKU_THEME');
             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -939,7 +939,7 @@
                 if (savedData) {
                     appState = JSON.parse(savedData);
                 } else {
-                    generateDummyTransactions();
+                    appState.salesTransactions = [];
                     saveState();
                 }
             } catch (e) {
@@ -954,47 +954,6 @@
 
         function formatDateKey(dateObj) {
             return dateObj.toISOString().split('T')[0];
-        }
-
-        function generateDummyTransactions() {
-            const today = new Date();
-            const todayStr = formatDateKey(today);
-            const dummy = [];
-            
-            dummy.push({
-                id: 'tx_today_1',
-                date: todayStr,
-                productName: "Paket Standar B",
-                unitPrice: 750000,
-                qty: 1,
-                totalAmount: 750000
-            });
-            dummy.push({
-                id: 'tx_today_2',
-                date: todayStr,
-                productName: "Paket Premium A",
-                unitPrice: 1500000,
-                qty: 4,
-                totalAmount: 6000000
-            });
-
-            for (let i = 1; i < 7; i++) {
-                const d = new Date();
-                d.setDate(today.getDate() - i);
-                const dateStr = formatDateKey(d);
-                const prod = appState.masterProducts[i % appState.masterProducts.length];
-                const qty = (i % 2) + 1;
-                const unitPrice = prod ? prod.price : 500000;
-                dummy.push({
-                    id: 'tx_' + Date.now() + '_' + i,
-                    date: dateStr,
-                    productName: prod ? prod.name : "Penjualan Direct",
-                    unitPrice: unitPrice,
-                    qty: qty,
-                    totalAmount: unitPrice * qty
-                });
-            }
-            appState.salesTransactions = dummy;
         }
 
         // TIMER SAPAAN RANDOM, MOTIVASI KOCAK & TENOR CAT GIF (60 DETIK)
@@ -1473,7 +1432,7 @@
                 if (confirm("PERINGATAN: Seluruh data penjualan dan target akan di-reset ke setelan awal. Lanjutkan?")) {
                     localStorage.removeItem('DODOLANKU_APP_DATA');
                     appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
-                    generateDummyTransactions();
+                    appState.salesTransactions = []; // Reset ke 0 transaksi
                     saveState();
                     document.getElementById('salesInputDate').value = todayStr;
                     updatePeriodicHeaderContent();
