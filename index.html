@@ -452,7 +452,7 @@
 
         <!-- ================= TAB 1: HOME ================= -->
         <div class="tab-content active" id="tab-home">
-            <!-- Header Staff & Sapaan Jawa Lucu + Animated Cat Avatar (From Tenor) -->
+            <!-- Header Staff & Sapaan Waktu Santai + Animated Cat Avatar (From Tenor) -->
             <div class="glass-card">
                 <div class="user-row">
                     <div style="display:flex; align-items:center; gap:12px;">
@@ -461,7 +461,7 @@
                         </div>
 
                         <div>
-                            <div class="welcome" id="javaneseGreeting">Sugeng Makaryo! 🤪</div>
+                            <div class="welcome" id="javaneseGreeting">Met Pagi 👋</div>
                             <div class="staff-name" id="staffNameHome">Frans Ganteng</div>
                         </div>
                     </div>
@@ -751,27 +751,38 @@
             "https://media.tenor.com/LPLwwL9Rx6oAAAAC/paws-playing.gif"
         ];
 
-        const javaneseGreetings = [
-            "Sugeng Makaryo, Ojo Ngelamun Wae! 🤪",
-            "Semangat Cari Cuan, Kanggo Tuku Seblak! 🍜",
-            "Nyambut Gawe Sing Sregep, Ojo Turu Wae! 😴",
-            "Kerjo Sing Tenanan, Ben Ora Dijodohne Simbok! 😁",
-            "Ora Kerjo Ora Mangan, Ndang Semangat! 🔥",
-            "Semangat Bosque, Target Menanti Ojo Patah Hati! 💔",
-            "Ayo Kerjo, Ben Iso Tuku Kopi Hits! ☕",
-            "Ojo Kendor, Duit Ora Teko Soko Langit! 💸"
-        ];
-
-        const motivationalQuotes = [
-            "Hari ini adalah peluang baru,",
-            "Konsistensi adalah kunci keberhasilan,",
-            "Setiap langkah kecil membawamu lebih dekat ke target,",
-            "Tetap fokus dan berikan pelayanan terbaik,",
-            "Kerja kerasmu hari ini menentukan hasil besok,",
-            "Semangat melampaui batas hari ini,"
+        // Motivasi Kocak Relate
+        const funnyMotivationalQuotes = [
+            "Kerja keraslah sampai tetangga mikir kamu miara tuyul! 👻",
+            "Uang memang bukan segalanya, tapi seblak & boba butuh uang 🧋",
+            "Semangat! Ingat, dompetmu butuh pertolongan medis 💸",
+            "Jangan menyerah, kamu belum jadi kaya raya! 🚀",
+            "Rezeki itu dikejar, bukan cuma di-story-in doang 🔥",
+            "Kerja mulu kaya kagak, tapi kalo ga kerja makin miskin 😭",
+            "Ingat target, selangkah lagi kamu bisa checkout keranjang shopee 🛒",
+            "Tetap semangat! Tagihan bulan depan sudah melambaikan tangan 👋",
+            "Duit kagak dibawa mati, tapi kalo kagak ada duit berasa mau mati 💀"
         ];
 
         let chartInstance = null;
+
+        // Fungsi Penentu Sapaan Otomatis Sesuai Jam
+        function getTimeBasedGreeting() {
+            const hour = new Date().getHours();
+            let greetings = [];
+
+            if (hour >= 4 && hour < 11) {
+                greetings = ["Met pagi 👋", "Met pagi bosku 👋", "Pagi-pagi semangat 👋", "Met pagi all 👋"];
+            } else if (hour >= 11 && hour < 15) {
+                greetings = ["Met siang 👋", "Met siang bosku 👋", "Siang-siang semangat 👋", "Met siang all 👋"];
+            } else if (hour >= 15 && hour < 18) {
+                greetings = ["Met sore 👋", "Met sore bosku 👋", "Sore-sore cari cuan 👋", "Met sore all 👋"];
+            } else {
+                greetings = ["Met malam 👋", "Met malem bosku 👋", "Malam-malam semangat 👋", "Met malam all 👋"];
+            }
+
+            return greetings[Math.floor(Math.random() * greetings.length)];
+        }
 
         function saveState() {
             try {
@@ -845,9 +856,10 @@
             appState.salesTransactions = dummy;
         }
 
+        // TIMER SAPAAN WAKTU, MOTIVASI KOCAK & TENOR CAT GIF (60 DETIK)
         function updatePeriodicHeaderContent() {
-            const randomGreeting = javaneseGreetings[Math.floor(Math.random() * javaneseGreetings.length)];
-            const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+            const randomGreeting = getTimeBasedGreeting();
+            const randomQuote = funnyMotivationalQuotes[Math.floor(Math.random() * funnyMotivationalQuotes.length)];
             const randomCatGif = catGifUrls[Math.floor(Math.random() * catGifUrls.length)];
             
             const greetingEl = document.getElementById('javaneseGreeting');
@@ -860,7 +872,7 @@
 
             setTimeout(() => {
                 greetingEl.textContent = randomGreeting;
-                motivationEl.textContent = `${randomQuote} ${appState.staffName}!`;
+                motivationEl.textContent = `${randomQuote}`;
                 catImgEl.src = randomCatGif;
                 
                 greetingEl.style.opacity = 1;
