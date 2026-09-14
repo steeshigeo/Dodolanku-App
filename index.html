@@ -32,7 +32,7 @@
             color-scheme: dark;
         }
 
-        /* Light Mode Styles (High Contrast for Android & iOS) */
+        /* Light Mode Styles */
         body.light-mode {
             --bg-dark: #f1f5f9;
             --glass-bg: #ffffff;
@@ -382,7 +382,7 @@
         }
 
         /* Grid Cards */
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .grid-card { display: flex; flex-direction: column; gap: 6px; padding: 14px 10px; }
         .grid-card .label { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
         .grid-card .val { font-size: 0.92rem; font-weight: 700; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -407,7 +407,7 @@
         .history-card {
             background: var(--card-sub-bg);
             border-radius: 14px; padding: 14px;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; flex-direction: column; gap: 10px;
             border: 1px solid var(--card-sub-border); margin-top: 10px;
             color: var(--text-main);
         }
@@ -623,14 +623,17 @@
                 </div>
             </div>
 
-            <!-- Breakdown Grid (3 Columns) -->
-            <div class="grid-3">
-                <div class="glass-card grid-card">
-                    <div class="label">🎯 Target Harian</div>
-                    <div class="val" id="dailyTargetText">Rp0</div>
-                    <div class="sub">Minimum / hari</div>
+            <!-- Card Target Harian 1 Baris Penuh (Lebih Ringkas) -->
+            <div class="glass-card" style="padding: 14px 18px;">
+                <div class="progress-title" style="margin-bottom: 4px;">🎯 Target Harian</div>
+                <div class="amount-row" style="margin-bottom: 0;">
+                    <div class="current-amount" id="dailyTargetText" style="font-size: 1.25rem;">Rp0</div>
+                    <div class="target-amount">Minimum / hari</div>
                 </div>
+            </div>
 
+            <!-- Grid 2 Kolom (Top Produk & Rata Sales) -->
+            <div class="grid-2">
                 <div class="glass-card grid-card">
                     <div class="label">🔥 Top Produk</div>
                     <div class="val" id="topSellingProductText" title="-">-</div>
@@ -652,7 +655,7 @@
                 </div>
             </div>
 
-            <!-- Kalender History -->
+            <!-- Kalender History dengan Tombol Input/Edit Sales Tanggal Lalu -->
             <div class="glass-card">
                 <div class="progress-title">Kalender & Detail Riwayat Harian</div>
                 <div style="text-align: left;">
@@ -660,12 +663,19 @@
                 </div>
 
                 <div class="history-card" id="historyDetailCard">
-                    <div>
-                        <div style="font-size: 0.85rem; font-weight: 700; color: var(--color-cyan);" id="historyDateText">Pilih Tanggal</div>
-                        <div style="font-size: 1.1rem; font-weight: 800; margin-top: 2px;" id="historyAmountText">Rp0</div>
-                        <div style="font-size: 0.72rem; color: var(--text-muted);" id="historyItemsText">0 Item Terjual</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: 700; color: var(--color-cyan);" id="historyDateText">Pilih Tanggal</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; margin-top: 2px;" id="historyAmountText">Rp0</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);" id="historyItemsText">0 Item Terjual</div>
+                        </div>
+                        <div id="historyBadge" style="font-size: 1.3rem;">📊</div>
                     </div>
-                    <div id="historyBadge" style="font-size: 1.3rem;">📊</div>
+                    
+                    <!-- Tombol Edit / Input Nominal Tanggal Terpilih -->
+                    <button class="btn-secondary" id="btnInputPastDateSales" style="width: 100%; font-size: 0.8rem; padding: 10px; margin-top: 4px; font-weight: 700;">
+                        ✏️ Input / Edit Sales Tanggal Ini
+                    </button>
                 </div>
             </div>
         </div>
@@ -746,7 +756,7 @@
     <div class="modal" id="salesModal">
         <div class="glass-card modal-content">
             <h3 style="margin-bottom: 4px;">📝 Catat Penjualan Baru</h3>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">Pilih atau isi produk yang terjual hari ini.</p>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">Pilih atau isi produk yang terjual.</p>
             
             <div class="form-group">
                 <label>Tanggal Transaksi</label>
@@ -1306,6 +1316,17 @@
                 salesModal.style.display = 'flex';
                 updateModalCalcPreview();
             });
+
+            // Tombol Input / Edit Sales untuk Tanggal Terpilih di Kalender
+            document.getElementById('btnInputPastDateSales').addEventListener('click', () => {
+                const selectedDate = document.getElementById('calendarPicker').value;
+                if (selectedDate) {
+                    document.getElementById('salesInputDate').value = selectedDate;
+                }
+                salesModal.style.display = 'flex';
+                updateModalCalcPreview();
+            });
+
             document.getElementById('closeSalesModal').addEventListener('click', () => {
                 salesModal.style.display = 'none';
             });
