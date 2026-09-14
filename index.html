@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light dark">
     <title>DODOLANKU - Staff Tracker</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,21 +18,34 @@
             --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             --text-main: #ffffff;
             --text-muted: rgba(255, 255, 255, 0.65);
+            --card-sub-bg: rgba(255, 255, 255, 0.04);
+            --card-sub-border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.4);
+            --modal-overlay: rgba(0, 0, 0, 0.75);
+            --modal-bg: rgba(18, 20, 38, 0.95);
+            
             --color-red: #ef4444;
             --color-yellow: #eab308;
             --color-green: #22c55e;
             --color-cyan: #06b6d4;
             --color-purple: #a855f7;
+            color-scheme: dark;
         }
 
-        /* Light Mode Styles */
+        /* Light Mode Styles (High Contrast for Android & iOS) */
         body.light-mode {
-            --bg-dark: #f8fafc;
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(0, 0, 0, 0.1);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
+            --bg-dark: #f1f5f9;
+            --glass-bg: #ffffff;
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.06);
             --text-main: #0f172a;
             --text-muted: #64748b;
+            --card-sub-bg: #f8fafc;
+            --card-sub-border: #e2e8f0;
+            --input-bg: #ffffff;
+            --modal-overlay: rgba(15, 23, 42, 0.4);
+            --modal-bg: #ffffff;
+            color-scheme: light;
         }
 
         body.light-mode .user-row .staff-name {
@@ -41,56 +55,30 @@
         }
         body.light-mode .status-pill {
             background: rgba(0, 0, 0, 0.05);
+            color: #0f172a;
         }
         body.light-mode .motivation-box {
-            background: rgba(0, 0, 0, 0.04);
+            background: #f8fafc;
             color: #334155;
+            border-left-color: var(--color-cyan);
         }
         body.light-mode .tab-bar {
-            background: rgba(255, 255, 255, 0.88);
+            background: rgba(255, 255, 255, 0.92);
             border-color: rgba(0, 0, 0, 0.1);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
         }
         body.light-mode .tab-item {
-            color: rgba(15, 23, 42, 0.5);
+            color: #64748b;
         }
         body.light-mode .tab-item.active {
             color: var(--color-cyan);
         }
         body.light-mode .live-today-card {
             background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(59, 130, 246, 0.08));
+            border-color: rgba(6, 182, 212, 0.25);
         }
-        body.light-mode .live-today-card #todayAchievedText {
-            color: #0f172a !important;
-        }
-        body.light-mode .form-input, 
-        body.light-mode .form-select, 
-        body.light-mode .calendar-picker {
-            background: rgba(0, 0, 0, 0.05);
-            border-color: rgba(0, 0, 0, 0.15);
-            color: #0f172a;
-            color-scheme: light;
-        }
-        body.light-mode .form-select option {
-            background: #ffffff;
-            color: #0f172a;
-        }
-        body.light-mode .history-card,
-        body.light-mode .sold-item-card {
-            background: rgba(0, 0, 0, 0.03);
-            border-color: rgba(0, 0, 0, 0.06);
-        }
-        body.light-mode .modal {
-            background: rgba(15, 23, 42, 0.4);
-        }
-        body.light-mode .modal-content {
-            background: rgba(255, 255, 255, 0.95);
-            border-color: rgba(0, 0, 0, 0.1);
-        }
-        body.light-mode .btn-secondary {
-            background: rgba(0, 0, 0, 0.06);
-            color: #0f172a;
-            border-color: rgba(0, 0, 0, 0.1);
+        body.light-mode .ambient-orb {
+            opacity: 0.35;
         }
 
         * {
@@ -121,6 +109,7 @@
             filter: blur(90px);
             z-index: -1;
             pointer-events: none;
+            transition: opacity 0.3s ease;
         }
         .orb-1 { width: 320px; height: 320px; background: rgba(37, 99, 235, 0.35); top: -50px; left: -80px; }
         .orb-2 { width: 350px; height: 350px; background: rgba(168, 85, 247, 0.28); bottom: 50px; right: -100px; }
@@ -251,6 +240,7 @@
             font-weight: 700;
             white-space: nowrap;
             flex-shrink: 0;
+            color: var(--text-main);
         }
         .status-dot {
             width: 8px;
@@ -270,7 +260,7 @@
             border-left: 3px solid var(--color-cyan);
             font-size: 0.82rem;
             font-style: italic;
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text-main);
             margin-top: 12px;
             min-height: 46px;
         }
@@ -291,7 +281,7 @@
             gap: 5px;
             background: rgba(239, 68, 68, 0.2);
             border: 1px solid rgba(239, 68, 68, 0.4);
-            color: #fca5a5;
+            color: #ef4444;
             padding: 2px 8px;
             border-radius: 20px;
             font-size: 0.65rem;
@@ -324,9 +314,9 @@
         .btn-action-main:active { transform: scale(0.96); }
 
         .btn-toggle-edit {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--card-sub-bg);
             border: 1px solid var(--glass-border);
-            color: white;
+            color: var(--text-main);
             padding: 6px 12px;
             border-radius: 12px;
             font-size: 0.75rem;
@@ -340,13 +330,13 @@
         .btn-toggle-edit.active {
             background: rgba(239, 68, 68, 0.2);
             border-color: rgba(239, 68, 68, 0.4);
-            color: #fca5a5;
+            color: #ef4444;
         }
 
         .btn-danger {
-            background: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.15);
             border: 1px solid rgba(239, 68, 68, 0.4);
-            color: #fca5a5;
+            color: #ef4444;
             padding: 10px;
             border-radius: 12px;
             font-size: 0.85rem;
@@ -357,9 +347,9 @@
         .btn-danger:active { transform: scale(0.96); }
 
         .btn-icon-delete {
-            background: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.15);
             border: 1px solid rgba(239, 68, 68, 0.4);
-            color: #fca5a5;
+            color: #ef4444;
             width: 32px;
             height: 32px;
             border-radius: 8px;
@@ -373,12 +363,13 @@
         /* Progress Line */
         .progress-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
         .amount-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
-        .current-amount { font-size: 1.5rem; font-weight: 800; }
+        .current-amount { font-size: 1.5rem; font-weight: 800; color: var(--text-main); }
         .target-amount { font-size: 0.75rem; color: var(--text-muted); }
 
         .progress-track {
             width: 100%; height: 14px;
-            background: rgba(255, 255, 255, 0.12);
+            background: var(--card-sub-bg);
+            border: 1px solid var(--glass-border);
             border-radius: 50px; overflow: hidden;
         }
         .progress-fill {
@@ -394,7 +385,7 @@
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .grid-card { display: flex; flex-direction: column; gap: 6px; padding: 14px 10px; }
         .grid-card .label { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
-        .grid-card .val { font-size: 0.92rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .grid-card .val { font-size: 0.92rem; font-weight: 700; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .grid-card .sub { font-size: 0.65rem; color: var(--text-muted); }
 
         .chart-container { position: relative; height: 180px; width: 100%; margin-top: 10px; }
@@ -403,31 +394,32 @@
         .calendar-picker {
             width: auto;
             max-width: 160px;
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--input-bg);
             border: 1px solid var(--glass-border);
-            color: white;
+            color: var(--text-main);
             padding: 8px 14px;
             border-radius: 20px;
             font-size: 0.82rem;
             outline: none;
-            color-scheme: dark;
             display: inline-block;
         }
 
         .history-card {
-            background: rgba(255, 255, 255, 0.04);
+            background: var(--card-sub-bg);
             border-radius: 14px; padding: 14px;
             display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.08); margin-top: 10px;
+            border: 1px solid var(--card-sub-border); margin-top: 10px;
+            color: var(--text-main);
         }
 
         /* Sold Items List */
-        .sold-item-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .sold-item-card, .master-item-row {
+            background: var(--card-sub-bg);
+            border: 1px solid var(--card-sub-border);
             border-radius: 14px; padding: 12px;
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 8px;
+            color: var(--text-main);
         }
 
         /* Bottom Tab Bar */
@@ -476,7 +468,7 @@
             display: flex; align-items: center; gap: 6px;
             padding: 6px 16px; background: var(--glass-bg);
             backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
-            border-radius: 50px; font-size: 0.72rem; color: rgba(255, 255, 255, 0.6);
+            border-radius: 50px; font-size: 0.72rem; color: var(--text-muted);
         }
         .heart { color: #ef4444; animation: pulse 1.5s infinite; }
 
@@ -489,11 +481,13 @@
         .modal {
             display: none; position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px);
+            background: var(--modal-overlay); backdrop-filter: blur(12px);
             z-index: 100; justify-content: center; align-items: center; padding: 20px;
         }
         .modal-content {
             width: 100%; max-width: 420px;
+            background: var(--modal-bg);
+            color: var(--text-main);
             display: flex; flex-direction: column; gap: 14px;
             max-height: 90vh; overflow-y: auto;
         }
@@ -501,17 +495,17 @@
         .form-group { display: flex; flex-direction: column; gap: 6px; }
         .form-group label { font-size: 0.8rem; color: var(--text-muted); }
         .form-input, .form-select {
-            background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border);
-            color: white; padding: 10px 12px; border-radius: 10px; outline: none; font-size: 0.9rem;
+            background: var(--input-bg); border: 1px solid var(--glass-border);
+            color: var(--text-main); padding: 10px 12px; border-radius: 10px; outline: none; font-size: 0.9rem;
         }
-        .form-select option { background: #111; color: white; }
+        .form-select option { background: var(--glass-bg); color: var(--text-main); }
         .btn-primary {
             background: linear-gradient(135deg, var(--color-cyan), #3b82f6);
             color: white; border: none; padding: 12px; border-radius: 12px;
             font-weight: 700; cursor: pointer;
         }
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.1); color: white;
+            background: var(--card-sub-bg); color: var(--text-main);
             border: 1px solid var(--glass-border); padding: 8px 12px;
             border-radius: 10px; font-size: 0.8rem; cursor: pointer;
         }
@@ -582,7 +576,7 @@
                         <span class="live-badge"><span class="pulse-red"></span> LIVE TODAY</span>
                         <span style="font-size:0.75rem; color:var(--text-muted);" id="todayDateLabel">Hari Ini</span>
                     </div>
-                    <div style="font-size:1.4rem; font-weight:800; color:#fff;" id="todayAchievedText">Rp0</div>
+                    <div style="font-size:1.4rem; font-weight:800; color:var(--text-main);" id="todayAchievedText">Rp0</div>
                 </div>
                 <div style="text-align:right;">
                     <div style="font-size:0.72rem; color:var(--text-muted);">Total Item Terjual</div>
@@ -715,7 +709,7 @@
 
             <!-- Tombol Reset Data Aplikasi -->
             <div class="glass-card" style="border: 1px solid rgba(239,68,68,0.3);">
-                <h3 style="color:#fca5a5; font-size:0.95rem; margin-bottom:6px;">⚠️ Ojo di demek iki angker</h3>
+                <h3 style="color:var(--color-red); font-size:0.95rem; margin-bottom:6px;">⚠️ Ojo di demek iki angker</h3>
                 <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Hapus seluruh data transaksi penjualan dan kembali ke setelan awal.</p>
                 <button class="btn-danger" id="resetDataBtn" style="width:100%;">🔄 Reset Semua Data Aplikasi</button>
             </div>
@@ -843,44 +837,17 @@
             "https://media.tenor.com/LPLwwL9Rx6oAAAAC/paws-playing.gif"
         ];
 
-        // Daftar Sapaan Jawa Terbaru
         const customGreetings = [
-            "Piye kabare?",
-            "Uwes madhang?",
-            "Sehat to, Cah?",
-            "Lagi ngopo kowe?",
-            "Wis tangi urung?",
-            "Ngopi sek, yuk!",
-            "Kabare piye Cuk?",
-            "Sepi wae Rek?",
-            "Wis mangan durung?",
-            "Piye, apik-apik?",
-            "Sugeng enjing nggeh!",
-            "Piye dino iki?",
-            "Sehat-sehat wae?",
-            "Lagi rapopo to awakmu?",
-            "Wis sarapan durung?",
-            "Apik-apik wae kan awakmu?",
-            "Piye, sehat?",
-            "Wis ngopi durung?",
-            "Kepiye kabare?",
-            "Lagi sibuk ta Cah?",
-            "Piye dagangane?",
-            "Wis mari turu?",
-            "Sehat terus, yo?",
-            "Piye kabare awakmu?",
-            "Uwes rampung durung?",
-            "Kabare gimana kowe?",
-            "Wis budhal durung?",
-            "Piye, aman?",
-            "Piye, betah?",
-            "Wis ngerti durung?",
-            "Sugeng rawuh nak!",
-            "Kepiye toh?",
-            "Piye, sek waras?"
+            "Piye kabare?", "Uwes madhang?", "Sehat to, Cah?", "Lagi ngopo kowe?",
+            "Wis tangi urung?", "Ngopi sek, yuk!", "Kabare piye Cuk?", "Sepi wae Rek?",
+            "Wis mangan durung?", "Piye, apik-apik?", "Sugeng enjing nggeh!", "Piye dino iki?",
+            "Sehat-sehat wae?", "Lagi rapopo to awakmu?", "Wis sarapan durung?", "Apik-apik wae kan awakmu?",
+            "Piye, sehat?", "Wis ngopi durung?", "Kepiye kabare?", "Lagi sibuk ta Cah?",
+            "Piye dagangane?", "Wis mari turu?", "Sehat terus, yo?", "Piye kabare awakmu?",
+            "Uwes rampung durung?", "Kabare gimana kowe?", "Wis budhal durung?", "Piye, aman?",
+            "Piye, betah?", "Wis ngerti durung?", "Sugeng rawuh nak!", "Kepiye toh?", "Piye, sek waras?"
         ];
 
-        // Motivasi Kocak Relate
         const funnyMotivationalQuotes = [
             "Kerja keraslah sampai tetangga mikir kamu miara tuyul! 👻",
             "Uang memang bukan segalanya, tapi seblak & boba butuh uang 🧋",
@@ -895,7 +862,6 @@
 
         let chartInstance = null;
 
-        // SISTEM TEMA LIGHT / DARK MODE (DEFAULT PERANGKAT)
         function initTheme() {
             const savedTheme = localStorage.getItem('DODOLANKU_THEME');
             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -916,13 +882,16 @@
             const textEl = document.getElementById('themeText');
             if (theme === 'light') {
                 document.body.classList.add('light-mode');
+                document.documentElement.setAttribute('data-theme', 'light');
                 if (iconEl) iconEl.textContent = '☀️';
                 if (textEl) textEl.textContent = 'Light';
             } else {
                 document.body.classList.remove('light-mode');
+                document.documentElement.setAttribute('data-theme', 'dark');
                 if (iconEl) iconEl.textContent = '🌙';
                 if (textEl) textEl.textContent = 'Dark';
             }
+            renderChart();
         }
 
         function saveState() {
@@ -956,7 +925,6 @@
             return dateObj.toISOString().split('T')[0];
         }
 
-        // TIMER SAPAAN RANDOM, MOTIVASI KOCAK & TENOR CAT GIF (60 DETIK)
         function updatePeriodicHeaderContent() {
             const randomGreeting = customGreetings[Math.floor(Math.random() * customGreetings.length)];
             const randomQuote = funnyMotivationalQuotes[Math.floor(Math.random() * funnyMotivationalQuotes.length)];
@@ -1108,7 +1076,7 @@
                 selectEl.appendChild(opt);
 
                 const itemRow = document.createElement('div');
-                itemRow.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.08);";
+                itemRow.className = 'master-item-row';
                 itemRow.innerHTML = `
                     <div>
                         <div style="font-size:0.85rem; font-weight:700;">${prod.name}</div>
@@ -1244,6 +1212,10 @@
             const ctx = document.getElementById('salesChart');
             if (!ctx) return;
 
+            const isLight = document.body.classList.contains('light-mode');
+            const textColor = isLight ? '#64748b' : 'rgba(255, 255, 255, 0.5)';
+            const gridColor = isLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.08)';
+
             const grouped = {};
             appState.salesTransactions.forEach(tx => {
                 const amt = tx.totalAmount || (tx.unitPrice * tx.qty) || tx.amount;
@@ -1285,8 +1257,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { size: 10 } } },
-                        y: { grid: { color: 'rgba(255, 255, 255, 0.08)' }, ticks: { display: false } }
+                        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
+                        y: { grid: { color: gridColor }, ticks: { display: false } }
                     }
                 }
             });
@@ -1432,7 +1404,7 @@
                 if (confirm("PERINGATAN: Seluruh data penjualan dan target akan di-reset ke setelan awal. Lanjutkan?")) {
                     localStorage.removeItem('DODOLANKU_APP_DATA');
                     appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
-                    appState.salesTransactions = []; // Reset ke 0 transaksi
+                    appState.salesTransactions = [];
                     saveState();
                     document.getElementById('salesInputDate').value = todayStr;
                     updatePeriodicHeaderContent();
