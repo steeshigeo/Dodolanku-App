@@ -357,6 +357,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            flex-shrink: 0;
         }
         .btn-icon-delete.show { display: flex; }
 
@@ -407,7 +408,7 @@
         .history-card {
             background: var(--card-sub-bg);
             border-radius: 14px; padding: 14px;
-            display: flex; flex-direction: column; gap: 10px;
+            display: flex; flex-direction: column; gap: 12px;
             border: 1px solid var(--card-sub-border); margin-top: 10px;
             color: var(--text-main);
         }
@@ -655,7 +656,7 @@
                 </div>
             </div>
 
-            <!-- Kalender History dengan Tombol Input/Edit Sales Tanggal Lalu -->
+            <!-- Kalender History dengan Detail List Transaksi Tanggal Terpilih & Hapus Item -->
             <div class="glass-card">
                 <div class="progress-title">Kalender & Detail Riwayat Harian</div>
                 <div style="text-align: left;">
@@ -673,9 +674,14 @@
                     </div>
                     
                     <!-- Tombol Edit / Input Nominal Tanggal Terpilih -->
-                    <button class="btn-secondary" id="btnInputPastDateSales" style="width: 100%; font-size: 0.8rem; padding: 10px; margin-top: 4px; font-weight: 700;">
-                        ✏️ Input / Edit Sales Tanggal Ini
+                    <button class="btn-secondary" id="btnInputPastDateSales" style="width: 100%; font-size: 0.8rem; padding: 10px; font-weight: 700;">
+                        ✏️ Input / Tambah Sales Tanggal Ini
                     </button>
+
+                    <!-- Container Dynamic List Item Transaksi untuk Tanggal Terpilih -->
+                    <div id="historyItemsListContainer" style="width: 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+                        <!-- List Rincian Transaksi Ditampilkan di Sini -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -1277,6 +1283,8 @@
         function updateHistoryDetail() {
             const dateVal = document.getElementById('calendarPicker').value;
             const dailyTarget = appState.totalTarget / 30;
+            const container = document.getElementById('historyItemsListContainer');
+            container.innerHTML = '';
 
             const filteredTx = appState.salesTransactions.filter(tx => tx.date === dateVal);
             const totalAmount = filteredTx.reduce((sum, t) => sum + (t.totalAmount || (t.unitPrice * t.qty) || t.amount), 0);
@@ -1287,11 +1295,40 @@
                 document.getElementById('historyAmountText').textContent = formatIDR(totalAmount);
                 document.getElementById('historyItemsText').textContent = `${totalItems} Item Terjual (${filteredTx.length} Transaksi)`;
                 document.getElementById('historyBadge').textContent = totalAmount >= dailyTarget ? '✅' : '⚠️';
+
+                filteredTx.forEach(tx => {
+                    const totalCalculated = tx.totalAmount || (tx.unitPrice * tx.qty) || (tx.amount * tx.qty);
+                    const unitP = tx.unitPrice || tx.amount || (tx.totalAmount / tx.qty);
+
+                    const card = document.createElement('div');
+                    card.className = 'sold-item-card';
+                    card.style.marginBottom = '0';
+                    card.innerHTML = `
+                        <div>
+                            <div style="font-size:0.82rem; font-weight:700;">${tx.productName}</div>
+                            <div style="font-size:0.8rem; color:var(--color-cyan); font-weight:800; margin-top:2px;">
+                                ${formatIDR(totalCalculated)} 
+                                <span style="font-size:0.7rem; color:var(--text-muted); font-weight:400;">
+                                    (${tx.qty}x @ ${formatIDR(unitP)})
+                                </span>
+                            </div>
+                        </div>
+                        <button class="btn-icon-delete show" onclick="deleteSalesTransaction('${tx.id}')" title="Hapus Item Ini">
+                            🗑️
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
             } else {
                 document.getElementById('historyDateText').textContent = dateVal ? `Tanggal: ${dateVal}` : 'Pilih Tanggal';
                 document.getElementById('historyAmountText').textContent = 'Rp0';
                 document.getElementById('historyItemsText').textContent = 'Tidak ada catatan transaksi';
                 document.getElementById('historyBadge').textContent = '📂';
+                container.innerHTML = `
+                    <div style="text-align:center; padding: 12px 0; color:var(--text-muted); font-size:0.75rem; font-style:italic;">
+                        Tidak ada catatan transaksi pada tanggal ini.
+                    </div>
+                `;
             }
         }
 
@@ -1317,7 +1354,6 @@
                 updateModalCalcPreview();
             });
 
-            // Tombol Input / Edit Sales untuk Tanggal Terpilih di Kalender
             document.getElementById('btnInputPastDateSales').addEventListener('click', () => {
                 const selectedDate = document.getElementById('calendarPicker').value;
                 if (selectedDate) {
