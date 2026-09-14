@@ -24,6 +24,75 @@
             --color-purple: #a855f7;
         }
 
+        /* Light Mode Styles */
+        body.light-mode {
+            --bg-dark: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        body.light-mode .user-row .staff-name {
+            background: linear-gradient(135deg, #0f172a 30%, #475569);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        body.light-mode .status-pill {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        body.light-mode .motivation-box {
+            background: rgba(0, 0, 0, 0.04);
+            color: #334155;
+        }
+        body.light-mode .tab-bar {
+            background: rgba(255, 255, 255, 0.88);
+            border-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        body.light-mode .tab-item {
+            color: rgba(15, 23, 42, 0.5);
+        }
+        body.light-mode .tab-item.active {
+            color: var(--color-cyan);
+        }
+        body.light-mode .live-today-card {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(59, 130, 246, 0.08));
+        }
+        body.light-mode .live-today-card #todayAchievedText {
+            color: #0f172a !important;
+        }
+        body.light-mode .form-input, 
+        body.light-mode .form-select, 
+        body.light-mode .calendar-picker {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: #0f172a;
+            color-scheme: light;
+        }
+        body.light-mode .form-select option {
+            background: #ffffff;
+            color: #0f172a;
+        }
+        body.light-mode .history-card,
+        body.light-mode .sold-item-card {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        body.light-mode .modal {
+            background: rgba(15, 23, 42, 0.4);
+        }
+        body.light-mode .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        body.light-mode .btn-secondary {
+            background: rgba(0, 0, 0, 0.06);
+            color: #0f172a;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -42,6 +111,7 @@
             padding: 16px 12px 95px 12px;
             overflow-x: hidden;
             position: relative;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* Ambient Glass Orbs Background */
@@ -104,6 +174,25 @@
             background: linear-gradient(135deg, #06b6d4, #3b82f6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+
+        .theme-toggle-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+        }
+        .theme-toggle-btn:active {
+            transform: scale(0.95);
         }
 
         /* User & Status Header */
@@ -448,11 +537,14 @@
         <!-- Navbar -->
         <div class="navbar">
             <h1>DODOLANKU</h1>
+            <button class="theme-toggle-btn" id="themeToggleBtn">
+                <span id="themeIcon">🌙</span> <span id="themeText">Dark</span>
+            </button>
         </div>
 
         <!-- ================= TAB 1: HOME ================= -->
         <div class="tab-content active" id="tab-home">
-            <!-- Header Staff & Sapaan Waktu Santai + Animated Cat Avatar (From Tenor) -->
+            <!-- Header Staff & Sapaan Random + Animated Cat Avatar (From Tenor) -->
             <div class="glass-card">
                 <div class="user-row">
                     <div style="display:flex; align-items:center; gap:12px;">
@@ -461,7 +553,7 @@
                         </div>
 
                         <div>
-                            <div class="welcome" id="javaneseGreeting">Met Pagi 👋</div>
+                            <div class="welcome" id="javaneseGreeting">Piye kabare?</div>
                             <div class="staff-name" id="staffNameHome">Frans Ganteng</div>
                         </div>
                     </div>
@@ -751,6 +843,43 @@
             "https://media.tenor.com/LPLwwL9Rx6oAAAAC/paws-playing.gif"
         ];
 
+        // Daftar Sapaan Jawa Terbaru (Random Setiap Menit)
+        const customGreetings = [
+            "Piye kabare?",
+            "Uwes madhang?",
+            "Sehat to, Cah?",
+            "Lagi ngopo kowe?",
+            "Wis tangi urung?",
+            "Ngopi sek, yuk!",
+            "Kabare piye Cuk?",
+            "Sepi wae Rek?",
+            "Wis mangan durung?",
+            "Piye, apik-apik?",
+            "Sugeng enjing nggeh!",
+            "Piye dino iki?",
+            "Sehat-sehat wae?",
+            "Lagi rapopo to awakmu?",
+            "Wis sarapan durung?",
+            "Apik-apik wae kan awakmu?",
+            "Piye, sehat?",
+            "Wis ngopi durung?",
+            "Kepiye kabare?",
+            "Lagi sibuk ta Cah?",
+            "Piye dagangane?",
+            "Wis mari turu?",
+            "Sehat terus, yo?",
+            "Piye kabare awakmu?",
+            "Uwes rampung durung?",
+            "Kabare gimana kowe?",
+            "Wis budhal durung?",
+            "Piye, aman?",
+            "Piye, betah?",
+            "Wis ngerti durung?",
+            "Sugeng rawuh nak!",
+            "Kepiye toh?",
+            "Piye, sek waras?"
+        ];
+
         // Motivasi Kocak Relate
         const funnyMotivationalQuotes = [
             "Kerja keraslah sampai tetangga mikir kamu miara tuyul! 👻",
@@ -766,22 +895,34 @@
 
         let chartInstance = null;
 
-        // Fungsi Penentu Sapaan Otomatis Sesuai Jam
-        function getTimeBasedGreeting() {
-            const hour = new Date().getHours();
-            let greetings = [];
+        // --- SISTEM TEMA LIGHT / DARK MODE (DEFAULT SESUAI PERANGKAT) ---
+        function initTheme() {
+            const savedTheme = localStorage.getItem('DODOLANKU_THEME');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            let activeTheme = savedTheme ? savedTheme : (systemPrefersDark ? 'dark' : 'light');
+            applyTheme(activeTheme);
 
-            if (hour >= 4 && hour < 11) {
-                greetings = ["Met pagi 👋", "Met pagi bosku 👋", "Pagi-pagi semangat 👋", "Met pagi all 👋"];
-            } else if (hour >= 11 && hour < 15) {
-                greetings = ["Met siang 👋", "Met siang bosku 👋", "Siang-siang semangat 👋", "Met siang all 👋"];
-            } else if (hour >= 15 && hour < 18) {
-                greetings = ["Met sore 👋", "Met sore bosku 👋", "Sore-sore cari cuan 👋", "Met sore all 👋"];
+            document.getElementById('themeToggleBtn').addEventListener('click', () => {
+                const currentTheme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+                const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                applyTheme(nextTheme);
+                localStorage.setItem('DODOLANKU_THEME', nextTheme);
+            });
+        }
+
+        function applyTheme(theme) {
+            const iconEl = document.getElementById('themeIcon');
+            const textEl = document.getElementById('themeText');
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+                if (iconEl) iconEl.textContent = '☀️';
+                if (textEl) textEl.textContent = 'Light';
             } else {
-                greetings = ["Met malam 👋", "Met malem bosku 👋", "Malam-malam semangat 👋", "Met malam all 👋"];
+                document.body.classList.remove('light-mode');
+                if (iconEl) iconEl.textContent = '🌙';
+                if (textEl) textEl.textContent = 'Dark';
             }
-
-            return greetings[Math.floor(Math.random() * greetings.length)];
         }
 
         function saveState() {
@@ -856,9 +997,9 @@
             appState.salesTransactions = dummy;
         }
 
-        // TIMER SAPAAN WAKTU, MOTIVASI KOCAK & TENOR CAT GIF (60 DETIK)
+        // TIMER SAPAAN RANDOM, MOTIVASI KOCAK & TENOR CAT GIF (60 DETIK)
         function updatePeriodicHeaderContent() {
-            const randomGreeting = getTimeBasedGreeting();
+            const randomGreeting = customGreetings[Math.floor(Math.random() * customGreetings.length)];
             const randomQuote = funnyMotivationalQuotes[Math.floor(Math.random() * funnyMotivationalQuotes.length)];
             const randomCatGif = catGifUrls[Math.floor(Math.random() * catGifUrls.length)];
             
@@ -1215,6 +1356,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             initTabBar();
+            initTheme();
             loadState();
 
             const todayStr = formatDateKey(new Date());
